@@ -220,7 +220,7 @@ resources:
           deploy_key: { get_param: deploy_key }
           destination: { get_param: destination}
           public: { get_param: public }
-          varnish: { get_param: varnish }
+          # varnish: { get_param: varnish }
           ssh_keypair_name: { get_param: ssh_keypair_name }
 
   load_balancer:
