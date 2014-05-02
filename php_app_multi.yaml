@@ -99,12 +99,6 @@ parameters:
         Must be shorter than 16 characters, this is due to MySQL's maximum
         username length.
 
-  db_pass:
-    type: string
-    hidden: true
-    description: Database access password
-    default: secret123
-
   db_size:
     type: number
     description: Size of the Rackspace Cloud Database
@@ -193,6 +187,12 @@ parameters:
 
 resources:
 
+  database_password:
+    type: "OS::Heat::RandomString"
+    properties:
+      length: 16
+      sequence: lettersdigits
+
   ssh_key:
     type: "OS::Nova::KeyPair"
     properties:
@@ -251,7 +251,7 @@ resources:
       - name: app_data
       users:
       - name: { get_param: db_user }
-        password: { get_param: db_pass }
+        password: { get_attr: [database_password, value] }
         databases: [ app_data ]
 
 outputs:
@@ -264,6 +264,10 @@ outputs:
   database_id:
     value: { get_resource: service_db }
     description: Database instance ID
+
+  database_password:
+    value: { get_attr: [database_password, value] }
+    description: User password for the Cloud Database
 
   server_public_ips:
     value: { get_attr: [php_setup, public_ip] }

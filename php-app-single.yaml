@@ -185,7 +185,7 @@ resources:
 outputs:
 
   public_ip:
-    value: { get_attr: [php_server, publicIPv4] }
+    value: { get_attr: [php_server, accessIPv4] }
 
   private_ip:
     value: { get_attr: [php_server, privateIPv4]}
