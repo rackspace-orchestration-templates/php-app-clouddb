@@ -33,7 +33,7 @@ heat --os-username <OS-USERNAME> --os-password <OS-PASSWORD> --os-tenant-id \
   <TENANT-ID> --os-auth-url https://identity.api.rackspacecloud.com/v2.0/ \
   stack-create myphpapp -f php_app_multi.yaml \
   -P repo=https://github.com/MyUser/MyApp.git -P url=http://myapp.org \
-  -P db_user=username
+  -P db_user=username -P db_pass=wxtRSvbx
 ```
 
 * For UK customers, use `https://lon.identity.api.rackspacecloud.com/v2.0/` as
@@ -63,9 +63,9 @@ the `-P` flag to specify a custom parameter.
 * `flavor`: Server size to use (Default: 4 GB Performance)
 * `db_flavor`: Amount of memory for the Cloud Database to use (Default: 1GB
   Instance)
-* `db_user`: User name to associate with the Cloud Database, the password is
-  automatically generated and will be provided in the outputs section.
-  (Default: db_user)
+* `db_user`: User name to associate with the Cloud Database (Default: db_user)
+* `db_pass`: Password to associate with the Cloud Database (Default:
+  none)
 * `db_size`: Disk size, in GB, for the Cloud Database (Default: 10)
 * `ssh_keypair_name`: Name of the SSH key pair to register with nova (Default:
   none)
@@ -92,7 +92,7 @@ Use `heat output-show <OUTPUT NAME>` to get the value fo a specific output.
 * `private_key`: SSH private that can be used to login as root to the servers.
 * `load_balancer_ip`: IP of the Load Balancer created with this deployment.
 * `database_id`: UUID of the Cloud Database created.
-* `database_password`: Password for the Cloud Databases instance.
+* `database_hostname`: Hostname for the Cloud Databases instance.
 * `server_public_ips`: Public IP addresses of the Cloud Servers created.
 * `server_private_ips`: Private IP addresses of the Cloud Servers created.
 

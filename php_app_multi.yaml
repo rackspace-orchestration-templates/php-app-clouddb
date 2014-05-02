@@ -99,6 +99,13 @@ parameters:
         Must be shorter than 16 characters, this is due to MySQL's maximum
         username length.
 
+  db_pass:
+    description: "Password for the database."
+    type: string
+    constraints:
+    - allowed_pattern: "^(.){8,}$"
+      description: Database password must be at least 8 characters long.
+
   db_size:
     type: number
     description: Size of the Rackspace Cloud Database
@@ -251,7 +258,8 @@ resources:
       - name: app_data
       users:
       - name: { get_param: db_user }
-        password: { get_attr: [database_password, value] }
+        password: { get_param: db_pass }
+        # password: { get_attr: [database_password, value] }
         databases: [ app_data ]
 
 outputs:
@@ -265,9 +273,13 @@ outputs:
     value: { get_resource: service_db }
     description: Database instance ID
 
-  database_password:
-    value: { get_attr: [database_password, value] }
-    description: User password for the Cloud Database
+  database_hostname:
+    value: { get_attr: [service_db, hostname]}
+    description: Hostname of the Cloud Database
+
+  # database_password:
+  #  value: { get_attr: [database_password, value] }
+  #  description: User password for the Cloud Database
 
   server_public_ips:
     value: { get_attr: [php_setup, public_ip] }
