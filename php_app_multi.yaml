@@ -171,10 +171,10 @@ parameters:
     type: string
     default: false
 
-  varnish:
-    description: Install Varnish
-    type: string
-    default: false
+  # varnish:
+  #  description: Install Varnish
+  #  type: string
+  #  default: false
 
   http_port:
     description: HTTP Port
