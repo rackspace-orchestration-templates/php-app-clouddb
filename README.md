@@ -4,7 +4,7 @@ Description
 This is a template for deploying a PHP application from a git repo under mod_php
 on multiple Linux servers with [OpenStack
 Heat](https://wiki.openstack.org/wiki/Heat) on the [Rackspace
-Cloud](http://www.rackspace.com/cloud/), with a [Cloud 
+Cloud](http://www.rackspace.com/cloud/), with a [Cloud
 Database](http://www.rackspace.com/cloud/databases/) back end. This template is leveraging
 [chef-solo](http://docs.opscode.com/chef_solo.html) to set up the server.
 
@@ -32,7 +32,7 @@ heat --os-username <OS-USERNAME> --os-password <OS-PASSWORD> --os-tenant-id \
   <TENANT-ID> --os-auth-url https://identity.api.rackspacecloud.com/v2.0/ \
   stack-create myphpapp -f php_app_multi.yaml \
   -P repo=https://github.com/MyUser/MyApp.git -P url=http://myapp.org \
-  -P db_user=username db_pass=password
+  -P db_user=username -P db_pass=password
 ```
 
 * For UK customers, use `https://lon.identity.api.rackspacecloud.com/v2.0/` as
@@ -65,7 +65,6 @@ the `-P` flag to specify a custom parameter.
 * `public`: the url path on which the application is accessed (Default: /)
 * `repo`: specifies a git URL from which to reploy the app (Default: none)
 * `rev`: the git tag or commit hash that should be deployed (Deafult: HEAD)
-* `varnish`: whether to install and configure [varnish](https://www.varnish-cache.org/). (Default: false)
 * `url`: the base url for your application (Default: http://example.com)
 * `flavor`: cloud server size to use. (Default: 4 GB Performance)
 * `ssh_keypair_name`: Name of the SSH key pair to register with nova (Default:
