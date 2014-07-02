@@ -227,7 +227,8 @@ parameters:
   public:
     label: Public Directory
     description: |
-      The public facing directory of your application relative to the destination.
+      The public facing directory of your application relative to the
+      destination.
     type: string
     default: /
 
