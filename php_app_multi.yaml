@@ -1,23 +1,45 @@
 heat_template_version: 2013-05-23
 
 description: |
-  Heat template to deploy a load balancer and multiple servers running a PHP app under apache
+  Heat template to deploy a load balancer and multiple servers running a PHP
+  app under Apache.
 
 parameter_groups:
-
-- label: Load Balancer Settings
-  parameters:
-  - load_balancer_hostname
-
 - label: Server Settings
   parameters:
-  - server_hostname
   - image
   - flavor
+  - server_count
+
+- label: Database Settings
+  parameters:
+  - db_flavor
+  - db_size
+  - db_user
+  - db_pass
 
 - label: PHP Application Settings
   parameters:
   - url
+  - revision
+  - packages
+  - repo
+  - deploy_key
+  - destination
+  - public
+
+- label: rax-dev-params
+  parameters:
+  - child_template
+  - load_balancer_hostname
+  - server_hostname
+  - http_port
+  - https_port
+  - memcached_size
+  - sslcert
+  - sslkey
+  - sslcacert
+  - database_name
 
 parameters:
 
@@ -48,19 +70,22 @@ parameters:
         Must begin with a letter and contain only alphanumeric characters.
 
   server_count:
-    label: Number Of Servers
-    description: Number of servers to deploy
+    label: Server Count
+    description: |
+      Required: Number of servers to spin up as a part of this deployment.
     type: number
     default: 2
     constraints:
     - range:
-        min: 0
-        max: 24
-      description: Must be between 0 and 24 servers.
+        min: 1
+        max: 25
+      description: Must be between 1 and 25 servers.
 
   image:
-    label: Server Image
-    description: Server Image
+    label: Operating System
+    description: |
+      Required: Server image used for all servers that are created as a part of
+      this deployment.
     type: string
     default: Ubuntu 12.04 LTS (Precise Pangolin)
     constraints:
@@ -70,7 +95,9 @@ parameters:
 
   flavor:
     label: Server Size
-    description: Rackspace Cloud Server flavor
+    description: |
+      Required: Rackspace Cloud Server flavor to use. The size is based on the
+      amount of RAM for the provisioned server.
     type: string
     default: 4 GB Performance
     constraints:
@@ -96,7 +123,9 @@ parameters:
 
   db_flavor:
     label: Cloud Database Size
-    description: Rackspace Cloud Database Flavor
+    description: |
+      Required: Rackspace Cloud Database Flavor. Size is based on amount of RAM
+      for the provisioned instance.
     type: string
     default: 1GB Instance
     constraints:
@@ -113,7 +142,8 @@ parameters:
 
   db_user:
     label: Database Username
-    description: "Username for the database."
+    description: |
+      Required: Username for the database.
     type: string
     default: db_user
     constraints:
@@ -124,7 +154,8 @@ parameters:
 
   db_pass:
     label: Database Password
-    description: "Password for the database."
+    description: |
+      Required: Password for the database.
     type: string
     constraints:
     - allowed_pattern: "^(.){8,}$"
@@ -133,60 +164,70 @@ parameters:
   db_size:
     label: Database Size
     type: number
-    description: Size of the Rackspace Cloud Database
+    description: |
+      Required: Amount of storage required for your Rackspace Cloud Database.
     default: 10
     constraints:
     - range:
-        min: 10
-        max: 150
+        min: 1
+        max: 300
     description: |
-        Database instance size, in GB. min 10, max 150
+        Database instance size, in GB. min 1, max 300
 
-  ssh_keypair_name:
-    label: SSH Keypair
-    description: Nova keypair name for ssh access to the server
+  database_name:
+    label: Database Name
+    description: |
+      Required: Name of your Cloud Database
     type: string
-    default: php-app
+    default: app_data
 
   revision:
     label: Revision
-    description: Git Branch/Ref
+    description: |
+      Optional: Git Branch/Ref to deploy. Default: HEAD
     type: string
     default: HEAD
 
   packages:
-    label: PHP Packages
-    description: PHP Packages
+    label: System Packages
+    description: |
+      Optional: Additional system packages to install. For a list of available
+      packages, see: http://packages.ubuntu.com/precise/allpackages
     type: string
     default: ''
 
   repo:
-    label: Git Repo
-    description: Git Repo URL
+    label: Git Repository
+    description: |
+      Optional: URL to your git repository. Use the https syntax for public
+      repositories, use git@ syntax for private repositories.
     type: string
     default: ''
 
   url:
     label: Site Domain
-    description: URL for site
+    description: URL for your site
     type: string
     default: 'http://example.com'
 
   deploy_key:
     label: Git Deploy Key
-    description: Git deploy key for private repositories.
+    description: |
+      Optional: If you specified a private repository, provide your private
+      deploy key here.
     type: string
     default: ''
 
   destination:
     label: Site Path
-    description: Deploy Directory
+    description: Path to setup your application on your servers.
     default: /var/www/vhosts/application
     type: string
 
   public:
-    label: Public Relative Directory
-    description: The public facing directory of your application relative to the destination.
+    label: Public Directory
+    description: |
+      The public facing directory of your application relative to the destination.
     type: string
     default: /
 
@@ -228,6 +269,11 @@ parameters:
     type: number
     default: 128
 
+  child_template:
+    label: Child Template
+    type: string
+    default: https://raw.github.com/rackspace-orchestration-templates/php-app-clouddb/master/php-app-single.yaml
+
 resources:
 
   database_password:
@@ -239,7 +285,7 @@ resources:
   ssh_key:
     type: "OS::Nova::KeyPair"
     properties:
-      name: { get_param: ssh_keypair_name }
+      name: { get_param: "OS::stack_id" }
       save_private_key: true
 
   php_setup:
@@ -247,8 +293,9 @@ resources:
     properties:
       count: { get_param: server_count }
       resource_def:
-        type: https://raw.github.com/rackspace-orchestration-templates/php-app-clouddb/master/php-app-single.yaml
+        type: { get_param: child_template }
         properties:
+          stack_id: { get_param: "OS::stack_id" }
           private_key: { get_attr: [ssh_key, private_key] }
           server_hostname: { get_param: server_hostname }
           image: { get_param: image }
@@ -264,7 +311,7 @@ resources:
           destination: { get_param: destination}
           public: { get_param: public }
           # varnish: { get_param: varnish }
-          ssh_keypair_name: { get_param: ssh_keypair_name }
+          ssh_keypair_name: { get_resource: ssh_key }
 
   load_balancer:
     type: "Rackspace::Cloud::LoadBalancer"
@@ -291,36 +338,30 @@ resources:
       flavor: { get_param: db_flavor }
       size: { get_param: db_size }
       databases:
-      - name: app_data
+      - name: { get_param: database_name }
       users:
       - name: { get_param: db_user }
         password: { get_param: db_pass }
         # password: { get_attr: [database_password, value] }
-        databases: [ app_data ]
+        databases: [ { get_param: database_name } ]
 
 outputs:
   private_key:
     value: { get_attr: [ssh_key, private_key] }
+    description: SSH Private Key
 
   load_balancer_ip:
-    value: { get_attr: [load_balancer, PublicIp]}
-
-  database_id:
-    value: { get_resource: service_db }
-    description: Database instance ID
+    value: { get_attr: [load_balancer, PublicIp] }
+    description: Load Balancer IP
 
   database_hostname:
     value: { get_attr: [service_db, hostname]}
-    description: Hostname of the Cloud Database
+    description: Cloud Database Host
+
+  database_name:
+    value: { get_param: database_name }
+    description: Database Name
 
   # database_password:
   #  value: { get_attr: [database_password, value] }
   #  description: User password for the Cloud Database
-
-  server_public_ips:
-    value: { get_attr: [php_setup, public_ip] }
-    description: Array of public IP's of the Cloud Servers created
-
-  server_private_ips:
-    value: { get_attr: [php_setup, private_ip] }
-    description: Array of private IP's of the Cloud Servers created
