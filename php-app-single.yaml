@@ -18,7 +18,10 @@ parameters:
         Must begin with a letter and contain only alphanumeric characters.
 
   image:
-    description: Server Image
+    label: Operating System
+    description: |
+      Server image used for all servers that are created as a part of this
+      deployment
     type: string
     default: Ubuntu 12.04 LTS (Precise Pangolin)
     constraints:
@@ -27,7 +30,10 @@ parameters:
       description: Must be a supported operating system.
 
   flavor:
-    description: Rackspace Cloud Server flavor
+    label: Server Size
+    description: |
+      Rackspace Cloud Server flavor to use. The size is based on the amount of
+      RAM for the provisioned server.
     type: string
     default: 4 GB Performance
     constraints:
@@ -134,10 +140,15 @@ parameters:
     type: string
     default: https://github.com/rackspace-orchestration-templates/php-app-clouddb
 
+  stack_id:
+    description: Meta data to attach to instances
+    type: string
+    default: heat
+
   chef_version:
     description: Version of chef client to use
     type: string
-    default: 11.12.4
+    default: 11.12.8
 
 resources:
 
@@ -148,6 +159,8 @@ resources:
       flavor: { get_param: flavor }
       image: { get_param: image }
       key_name: { get_param: ssh_keypair_name }
+      metadata:
+        rax-heat: { get_param: stack_id }
 
   php_setup:
     type: "OS::Heat::ChefSolo"
