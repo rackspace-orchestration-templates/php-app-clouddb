@@ -16,7 +16,7 @@ parameter_groups:
   - db_flavor
   - db_size
   - db_user
-  - db_pass
+  - datastore_version
 
 - label: PHP Application Settings
   parameters:
@@ -152,15 +152,6 @@ parameters:
         Must be shorter than 16 characters, this is due to MySQL's maximum
         username length.
 
-  db_pass:
-    label: Database Password
-    description: |
-      Required: Password for the database.
-    type: string
-    constraints:
-    - allowed_pattern: "^(.){8,}$"
-      description: Database password must be at least 8 characters long.
-
   db_size:
     label: Database Size
     type: number
@@ -180,6 +171,17 @@ parameters:
       Required: Name of your Cloud Database
     type: string
     default: app_data
+
+  datastore_version:
+    label: MySQL Version
+    type: string
+    description: |
+      Required: Version of MySQL to run on the Cloud Databases instance.
+    default: "5.6"
+    constraints:
+    - allowed_values:
+      - "5.6"
+      - "5.1"
 
   revision:
     label: Revision
@@ -311,7 +313,7 @@ resources:
           deploy_key: { get_param: deploy_key }
           destination: { get_param: destination}
           public: { get_param: public }
-          # varnish: { get_param: varnish }
+          #varnish: { get_param: varnish }
           ssh_keypair_name: { get_resource: ssh_key }
 
   load_balancer:
@@ -338,12 +340,13 @@ resources:
       name: app_db
       flavor: { get_param: db_flavor }
       size: { get_param: db_size }
+      datastore_type: mysql
+      datastore_version: { get_param: datastore_version }
       databases:
       - name: { get_param: database_name }
       users:
       - name: { get_param: db_user }
-        password: { get_param: db_pass }
-        # password: { get_attr: [database_password, value] }
+        password: { get_attr: [database_password, value] }
         databases: [ { get_param: database_name } ]
 
 outputs:
@@ -355,6 +358,10 @@ outputs:
     value: { get_attr: [load_balancer, PublicIp] }
     description: Load Balancer IP
 
+  server_ips:
+    value: { get_attr: [php_setup, public_ip] }
+    description: Server Public IPs
+
   database_hostname:
     value: { get_attr: [service_db, hostname]}
     description: Cloud Database Host
@@ -363,6 +370,10 @@ outputs:
     value: { get_param: database_name }
     description: Database Name
 
-  # database_password:
-  #  value: { get_attr: [database_password, value] }
-  #  description: User password for the Cloud Database
+  database_user:
+    value: { get_param: db_user }
+    description: Cloud Database User
+
+  database_password:
+    value: { get_attr: [database_password, value] }
+    description: Cloud Database Password
