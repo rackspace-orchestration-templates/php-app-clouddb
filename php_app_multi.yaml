@@ -156,7 +156,8 @@ parameters:
     label: Database Size
     type: number
     description: |
-      Required: Amount of storage required for your Rackspace Cloud Database.
+      Required: Amount of storage required for your Rackspace Cloud Database,
+      in GB.
     default: 10
     constraints:
     - range:
