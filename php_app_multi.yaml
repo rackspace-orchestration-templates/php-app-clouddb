@@ -236,16 +236,19 @@ parameters:
     default: /
 
   sslcert:
+    label: SSL Certificate
     description: SSL Certificate
     type: string
     default: false
 
   sslkey:
+    label: SSL Key
     description: SSL Key
     type: string
     default: false
 
   sslcacert:
+    label: SSL CA Certificate
     description: SSL CA Certificate
     type: string
     default: false
@@ -275,6 +278,7 @@ parameters:
 
   child_template:
     label: Child Template
+    description: Location of child template for provisioning web nodes.
     type: string
     default: https://raw.github.com/rackspace-orchestration-templates/php-app-clouddb/master/php-app-single.yaml
 
