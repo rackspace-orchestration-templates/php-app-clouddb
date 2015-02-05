@@ -2,6 +2,7 @@ import re
 from fabric.api import env, run, hide, task
 from envassert import detect, file, group, package, port, process, service, \
     user
+from hot.utils.test import get_artifacts, http_check
 
 
 def apache2_is_responding():
@@ -39,3 +40,9 @@ def check():
 
     assert apache2_is_responding(), \
         "php application did not respond as expected"
+
+
+@task
+def artifacts():
+    env.platform_family = detect.detect()
+    get_artifacts()
