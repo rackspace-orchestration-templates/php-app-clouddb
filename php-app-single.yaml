@@ -80,7 +80,7 @@ parameters:
     default: 'http://example.com'
 
   deploy_key:
-    description: Git deploy key for private repositories.
+    description: GitHub deploy key for private repositories.
     type: string
     default: ''
 
