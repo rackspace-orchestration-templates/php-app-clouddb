@@ -221,10 +221,10 @@ parameters:
     default: 'http://example.com'
 
   deploy_key:
-    label: Git Deploy Key
+    label: GitHub Deploy Key
     description: |
       Optional: If you specified a private repository, provide your private
-      deploy key here.
+      GitHub deploy key here.
     type: string
     default: ''
 
